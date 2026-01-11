@@ -43,13 +43,17 @@ int main()
 	Shader shader = Shader("src/Shaders/default.vert", "src/Shaders/default.frag");
 
 	float vertices[] = {
-		// positions        // color         // texture
-		-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, -0.5f, -0.5, // bottom left
-		0.5f,  -0.5f, 0.0,	0.0f, 1.0f, 0.0f, 0.5,	 -0.5, // bottom right
-		0.0f,  0.5f,  0.0,	0.0f, 0.0f, 1.0f, 0.0,	 0.5, // top middle
+		// positions          // colors           // texture coords
+		0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
+		0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+		-0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f // top left
 	};
 
-	unsigned int indices[] = { 0, 1, 2 };
+	unsigned int indices[] = {
+		0, 1, 3, // first triangle
+		1, 2, 3, // second triangle
+	};
 
 	unsigned int VAO;
 	unsigned int VBO;
@@ -88,9 +92,10 @@ int main()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	// create texture
-	unsigned int texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	// texture 1
+	unsigned int texture1;
+	glGenTextures(1, &texture1);
+	glBindTexture(GL_TEXTURE_2D, texture1);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -100,6 +105,7 @@ int main()
 	int img_width;
 	int img_height;
 	int nrChannels;
+	stbi_set_flip_vertically_on_load(true);
 	unsigned char* data = stbi_load("assets/wall.jpg", &img_width, &img_height, &nrChannels, 0);
 	if(data)
 	{
@@ -113,6 +119,33 @@ int main()
 	stbi_image_free(data);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	// texture 2
+	// unsigned int texture;
+	unsigned int texture2;
+	glGenTextures(1, &texture2);
+	glBindTexture(GL_TEXTURE_2D, texture2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	data = stbi_load("assets/awesomeface.png", &img_width, &img_height, &nrChannels, 0);
+	if(data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img_width, img_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	shader.use();
+	glUniform1i(glGetUniformLocation(shader.ID, "texture1"), 0);
+	glUniform1i(glGetUniformLocation(shader.ID, "texture2"), 1);
+
 	// main loop
 	while(!glfwWindowShouldClose(window))
 	{
@@ -121,9 +154,14 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture1);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture2);
+
 		shader.use();
 		glBindVertexArray(VAO);
-		glBindTexture(GL_TEXTURE_2D, texture);
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
 		// check and call events and swap the buffers
@@ -132,7 +170,8 @@ int main()
 	}
 
 	// delete texture
-	glDeleteTextures(1, &texture);
+	glDeleteTextures(1, &texture1);
+	glDeleteTextures(1, &texture2);
 
 	// delete objects
 	glDeleteVertexArrays(1, &VAO);
