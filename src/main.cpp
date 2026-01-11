@@ -5,6 +5,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "shader.h"
 
 const unsigned int width = 800;
@@ -44,15 +48,20 @@ int main()
 
 	float vertices[] = {
 		// positions          // colors           // texture coords
-		0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-		0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-		-0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f // top left
+		-0.5f, 0.0f, 0.5f,	0.83f, 0.70f, 0.44f, 0.0f, 0.0f, //
+		-0.5f, 0.0f, -0.5f, 0.83f, 0.70f, 0.44f, 5.0f, 0.0f, //
+		0.5f,  0.0f, -0.5f, 0.83f, 0.70f, 0.44f, 0.0f, 0.0f, //
+		0.5f,  0.0f, 0.5f,	0.83f, 0.70f, 0.44f, 5.0f, 0.0f, //
+		0.0f,  0.8f, 0.0f,	0.92f, 0.86f, 0.76f, 2.5f, 5.0f, //
 	};
 
 	unsigned int indices[] = {
-		0, 1, 3, // first triangle
-		1, 2, 3, // second triangle
+		0, 1, 2, //
+		0, 2, 3, //
+		0, 1, 4, //
+		1, 2, 4, //
+		2, 3, 4, //
+		3, 0, 4, //
 	};
 
 	unsigned int VAO;
@@ -119,32 +128,10 @@ int main()
 	stbi_image_free(data);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	// texture 2
-	// unsigned int texture;
-	unsigned int texture2;
-	glGenTextures(1, &texture2);
-	glBindTexture(GL_TEXTURE_2D, texture2);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	data = stbi_load("assets/awesomeface.png", &img_width, &img_height, &nrChannels, 0);
-	if(data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img_width, img_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
 	shader.use();
 	glUniform1i(glGetUniformLocation(shader.ID, "texture1"), 0);
-	glUniform1i(glGetUniformLocation(shader.ID, "texture2"), 1);
+
+	glEnable(GL_DEPTH_TEST);
 
 	// main loop
 	while(!glfwWindowShouldClose(window))
@@ -152,15 +139,24 @@ int main()
 		processInput(window);
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture1);
 
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture2);
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::mat4 view = glm::mat4(1.0f);
+		glm::mat4 proj = glm::mat4(1.0f);
+
+		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+		view = glm::translate(view, glm::vec3(0.0f, -0.5f, -3.0f));
+		proj = glm::perspective(glm::radians(45.0f), ((float)width / height), 0.1f, 100.0f);
 
 		shader.use();
+		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
+
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
@@ -171,7 +167,6 @@ int main()
 
 	// delete texture
 	glDeleteTextures(1, &texture1);
-	glDeleteTextures(1, &texture2);
 
 	// delete objects
 	glDeleteVertexArrays(1, &VAO);
