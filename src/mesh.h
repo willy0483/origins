@@ -17,15 +17,14 @@ private:
 	unsigned int VBO;
 	unsigned int EBO;
 
-	void SetUpMesh();
-
 public:
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 
-	Mesh(std::vector<Vertex> newVertices, std::vector<unsigned int> newIndices);
+	Mesh();
 	~Mesh();
 
+	void SetUpMesh();
 	void Draw();
 };
 

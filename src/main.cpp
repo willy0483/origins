@@ -47,6 +47,48 @@ int main()
 	// create shaders
 	Shader shader = Shader("src/Shaders/default.vert", "src/Shaders/default.frag");
 
+	std::vector<Vertex> vertices = {
+		Vertex{ glm::vec3{ -0.5f, 0.0f, 0.5f } }, // Bottom front left
+		Vertex{ glm::vec3{ -0.5f, 0.0f, -0.5f } }, // Bottom back left
+		Vertex{ glm::vec3{ 0.5f, 0.0f, -0.5f } }, // Bottom back right
+		Vertex{ glm::vec3{ 0.5f, 0.0f, 0.5f } }, // Bottom front right
+
+		Vertex{ glm::vec3{ -0.5f, 0.5f, 0.5f } }, // Top front left
+		Vertex{ glm::vec3{ -0.5f, 0.5f, -0.5f } }, // Top back left
+		Vertex{ glm::vec3{ 0.5f, 0.5f, -0.5f } }, // Top back right
+		Vertex{ glm::vec3{ 0.5f, 0.5f, 0.5f } }, // Top front right
+
+	};
+
+	std::vector<unsigned int> indices = {
+        // faces
+        // front
+        0,4,3,//
+        3,4,7,//
+        // back
+        1,2,6,//
+        6,5,1,//
+        // left
+        0,1,5,//
+        5,4,0,//
+        // right
+        3,2,6,//
+        6,7,3,//
+        // top
+        7,6,5,// 
+        5,4,7,// 
+        // bottom
+        0,1,2,//
+        2,3,0,//
+    };
+
+
+    Mesh test;
+    test.vertices = vertices;
+    test.indices = indices;
+
+    test.SetUpMesh();
+
 	glEnable(GL_DEPTH_TEST);
 
 	// main loop
@@ -68,6 +110,8 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
+
+        test.Draw();
 
 		// check and call events and swap the buffers
 		glfwSwapBuffers(window);

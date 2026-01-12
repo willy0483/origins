@@ -1,12 +1,7 @@
 #include "mesh.h"
 
-Mesh::Mesh(std::vector<Vertex> newVertices, std::vector<unsigned int> newIndices)
-{
-	vertices = newVertices;
-	indices = newIndices;
-
-	SetUpMesh();
-}
+Mesh::Mesh()
+{}
 
 void Mesh::SetUpMesh()
 {
