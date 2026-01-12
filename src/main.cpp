@@ -10,7 +10,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "shader.h"
-#include "mesh.h"
 
 const unsigned int width = 800;
 const unsigned int height = 600;
@@ -47,47 +46,57 @@ int main()
 	// create shaders
 	Shader shader = Shader("src/Shaders/default.vert", "src/Shaders/default.frag");
 
-	std::vector<Vertex> vertices = {
-		Vertex{ glm::vec3{ -0.5f, 0.0f, 0.5f } }, // Bottom front left
-		Vertex{ glm::vec3{ -0.5f, 0.0f, -0.5f } }, // Bottom back left
-		Vertex{ glm::vec3{ 0.5f, 0.0f, -0.5f } }, // Bottom back right
-		Vertex{ glm::vec3{ 0.5f, 0.0f, 0.5f } }, // Bottom front right
-
-		Vertex{ glm::vec3{ -0.5f, 0.5f, 0.5f } }, // Top front left
-		Vertex{ glm::vec3{ -0.5f, 0.5f, -0.5f } }, // Top back left
-		Vertex{ glm::vec3{ 0.5f, 0.5f, -0.5f } }, // Top back right
-		Vertex{ glm::vec3{ 0.5f, 0.5f, 0.5f } }, // Top front right
-
+	float vertices[] = {
+		-0.5f, -0.5f, 0.5f, // 0: Bottom front left
+		-0.5f, -0.5f, -0.5f, // 1: Bottom back left
+		0.5f,  -0.5f, -0.5f, // 2: Bottom back right
+		0.5f,  -0.5f, 0.5f, // 3: Bottom front right
+		-0.5f, 0.5f,  0.5f, // 4: Top front left
+		-0.5f, 0.5f,  -0.5f, // 5: Top back left
+		0.5f,  0.5f,  -0.5f, // 6: Top back right
+		0.5f,  0.5f,  0.5f, // 7: Top front right
 	};
 
-	std::vector<unsigned int> indices = {
-        // faces
-        // front
-        0,4,3,//
-        3,4,7,//
-        // back
-        1,2,6,//
-        6,5,1,//
-        // left
-        0,1,5,//
-        5,4,0,//
-        // right
-        3,2,6,//
-        6,7,3,//
-        // top
-        7,6,5,// 
-        5,4,7,// 
-        // bottom
-        0,1,2,//
-        2,3,0,//
-    };
+	unsigned int indices[] = {
+		0, 4, 3, //
+		3, 4, 7, //
+		1, 2, 6, //
+		6, 5, 1, //
+		0, 1, 5, //
+		5, 4, 0, //
+		3, 2, 6, //
+		6, 7, 3, //
+		7, 6, 5, //
+		5, 4, 7, //
+		0, 1, 2, //
+		2, 3, 0, //
+	};
 
+	unsigned int VAO;
+	unsigned int VBO;
+	unsigned int EBO;
 
-    Mesh test;
-    test.vertices = vertices;
-    test.indices = indices;
+	// generate
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
 
-    test.SetUpMesh();
+	// bind - data
+	glBindVertexArray(VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	// attributes
+	// positions
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	// unbind
+	glBindVertexArray(0);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -103,6 +112,7 @@ int main()
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 proj = glm::mat4(1.0f);
 
+		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 0.5f, 0.0f));
 		view = glm::translate(view, glm::vec3(0.0f, -0.5f, -10.0f));
 		proj = glm::perspective(glm::radians(45.0f), ((float)width / height), 0.1f, 100.0f);
 
@@ -111,12 +121,17 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
 
-        test.Draw();
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
 		// check and call events and swap the buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 
 	// delete shaders
 	shader.deleteProgram();
