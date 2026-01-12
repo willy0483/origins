@@ -100,6 +100,8 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	// main loop
 	while(!glfwWindowShouldClose(window))
 	{
@@ -112,7 +114,10 @@ int main()
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 proj = glm::mat4(1.0f);
 
-		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 0.5f, 0.0f));
+		float time = glfwGetTime();
+		model = glm::rotate(model, time * 0.7f, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, time * 1.1f, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, time * 0.4f, glm::vec3(0.0f, 0.0f, 1.0f));
 		view = glm::translate(view, glm::vec3(0.0f, -0.5f, -10.0f));
 		proj = glm::perspective(glm::radians(45.0f), ((float)width / height), 0.1f, 100.0f);
 
