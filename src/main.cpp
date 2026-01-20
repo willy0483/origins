@@ -46,49 +46,42 @@ int main()
 	// create shaders
 	Shader shader = Shader("src/Shaders/default.vert", "src/Shaders/default.frag");
 
-	float vertices[] = {
-		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, //
-		0.5f,  -0.5f, -0.5f, 1.0f, 0.0f, //
-		0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
-		0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
-		-0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, //
-		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, //
+	std::vector<float> plane;
+	std::vector<unsigned int> indices;
 
-		-0.5f, -0.5f, 0.5f,	 0.0f, 0.0f, //
-		0.5f,  -0.5f, 0.5f,	 1.0f, 0.0f, //
-		0.5f,  0.5f,  0.5f,	 1.0f, 1.0f, //
-		0.5f,  0.5f,  0.5f,	 1.0f, 1.0f, //
-		-0.5f, 0.5f,  0.5f,	 0.0f, 1.0f, //
-		-0.5f, -0.5f, 0.5f,	 0.0f, 0.0f, //
+	int div = 6;
+	float triangleSide = 2.0f / div;
+	float start = -(div * triangleSide) * 0.5f;
+	for(int row = 0; row < div + 1; row++)
+	{
+		for(int col = 0; col < div + 1; col++)
+		{
+			glm::vec3 currentVec = glm::vec3(start + col * triangleSide, 0.0, start + row * -triangleSide);
+			plane.push_back(currentVec.x);
+			plane.push_back(currentVec.y);
+			plane.push_back(currentVec.z);
+		}
+	}
 
-		-0.5f, 0.5f,  0.5f,	 1.0f, 0.0f, //
-		-0.5f, 0.5f,  -0.5f, 1.0f, 1.0f, //
-		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
-		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
-		-0.5f, -0.5f, 0.5f,	 0.0f, 0.0f, //
-		-0.5f, 0.5f,  0.5f,	 1.0f, 0.0f, //
+	for(int row = 0; row < div; row++)
+	{
+		for(int col = 0; col < div; col++)
+		{
+			int index = row * (div + 1) + col;
+			// top triangle
+			indices.push_back(index);
+			indices.push_back(index + (div + 1) + 1);
+			indices.push_back(index + (div + 1));
 
-		0.5f,  0.5f,  0.5f,	 1.0f, 0.0f, //
-		0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
-		0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, //
-		0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, //
-		0.5f,  -0.5f, 0.5f,	 0.0f, 0.0f, //
-		0.5f,  0.5f,  0.5f,	 1.0f, 0.0f, //
+			// bottom triangle
+			indices.push_back(index);
+			indices.push_back(index + 1);
+			indices.push_back(index + (div + 1) + 1);
+		}
+	}
 
-		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
-		0.5f,  -0.5f, -0.5f, 1.0f, 1.0f, //
-		0.5f,  -0.5f, 0.5f,	 1.0f, 0.0f, //
-		0.5f,  -0.5f, 0.5f,	 1.0f, 0.0f, //
-		-0.5f, -0.5f, 0.5f,	 0.0f, 0.0f, //
-		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //
-
-		-0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, //
-		0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, //
-		0.5f,  0.5f,  0.5f,	 1.0f, 0.0f, //
-		0.5f,  0.5f,  0.5f,	 1.0f, 0.0f, //
-		-0.5f, 0.5f,  0.5f,	 0.0f, 0.0f, //
-		-0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, //
-	};
+	std::cout << "Plane: " << plane.size() << std::endl;
+	std::cout << "Indices: " << indices.size() << std::endl;
 
 	unsigned int VAO;
 	unsigned int VBO;
@@ -101,52 +94,19 @@ int main()
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, plane.size() * sizeof(float), plane.data(), GL_STATIC_DRAW);
 
 	// attributes
 	// positions
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-
-	// texture coords
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
 
 	// unbind
 	glBindVertexArray(0);
 
-	// texture
-	unsigned int texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	int image_width;
-	int image_height;
-	int nrChannels;
-
-	unsigned char* data = stbi_load("assets/wall.jpg", &image_width, &image_height, &nrChannels, 0);
-	if(data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-
-	shader.use();
-	glUniform1i(glGetUniformLocation(shader.ID, "tex0"), 0);
-
 	glEnable(GL_DEPTH_TEST);
 
-	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	// main loop
 	while(!glfwWindowShouldClose(window))
@@ -160,11 +120,8 @@ int main()
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 proj = glm::mat4(1.0f);
 
-		float time = glfwGetTime();
-		model = glm::rotate(model, time * 0.7f, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, time * 1.1f, glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, time * 0.4f, glm::vec3(0.0f, 0.0f, 1.0f));
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		view = glm::translate(view, glm::vec3(0.0f, -1.5f, -2.0f));
+		view = glm::rotate(view, glm::radians(50.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		proj = glm::perspective(glm::radians(45.0f), ((float)width / height), 0.1f, 100.0f);
 
 		shader.use();
@@ -172,11 +129,8 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
 
 		// check and call events and swap the buffers
 		glfwSwapBuffers(window);
