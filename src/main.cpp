@@ -8,11 +8,21 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/noise.hpp>
 
 #include "shader.h"
 
 const unsigned int width = 800;
 const unsigned int height = 600;
+
+// camera
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+// timing
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
 
 void processInput(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow*, int width, int height);
@@ -46,55 +56,51 @@ int main()
 	// create shaders
 	Shader shader = Shader("src/Shaders/default.vert", "src/Shaders/default.frag");
 
-	std::vector<float> plane;
-	std::vector<unsigned int> indices;
+	// camera - Walk around : https://learnopengl.com/Getting-started/Camera
 
-	int div = 6;
-	float triangleSide = 2.0f / div;
-	float start = -(div * triangleSide) * 0.5f;
-	for(int row = 0; row < div + 1; row++)
-	{
-		for(int col = 0; col < div + 1; col++)
-		{
-			glm::vec3 currentVec = glm::vec3(start + col * triangleSide, 0.0, start + row * -triangleSide);
-			plane.push_back(currentVec.x);
-			plane.push_back(currentVec.y);
-			plane.push_back(currentVec.z);
-		}
-	}
+	float vertices[] = {
+		-0.5f, -0.5f, 0.5f, // 0: Bottom front left
+		-0.5f, -0.5f, -0.5f, // 1: Bottom back left
+		0.5f,  -0.5f, -0.5f, // 2: Bottom back right
+		0.5f,  -0.5f, 0.5f, // 3: Bottom front right
+		-0.5f, 0.5f,  0.5f, // 4: Top front left
+		-0.5f, 0.5f,  -0.5f, // 5: Top back left
+		0.5f,  0.5f,  -0.5f, // 6: Top back right
+		0.5f,  0.5f,  0.5f, // 7: Top front right
+	};
 
-	for(int row = 0; row < div; row++)
-	{
-		for(int col = 0; col < div; col++)
-		{
-			int index = row * (div + 1) + col;
-			// top triangle
-			indices.push_back(index);
-			indices.push_back(index + (div + 1) + 1);
-			indices.push_back(index + (div + 1));
-
-			// bottom triangle
-			indices.push_back(index);
-			indices.push_back(index + 1);
-			indices.push_back(index + (div + 1) + 1);
-		}
-	}
-
-	std::cout << "Plane: " << plane.size() << std::endl;
-	std::cout << "Indices: " << indices.size() << std::endl;
+	unsigned int indices[] = {
+		0, 4, 3, //
+		3, 4, 7, //
+		1, 2, 6, //
+		6, 5, 1, //
+		0, 1, 5, //
+		5, 4, 0, //
+		3, 2, 6, //
+		6, 7, 3, //
+		7, 6, 5, //
+		5, 4, 7, //
+		0, 1, 2, //
+		2, 3, 0, //
+	};
 
 	unsigned int VAO;
 	unsigned int VBO;
+	unsigned int EBO;
 
 	// generate
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
 
 	// bind - data
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, plane.size() * sizeof(float), plane.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// attributes
 	// positions
@@ -108,9 +114,15 @@ int main()
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+	lastFrame = glfwGetTime();
+
 	// main loop
 	while(!glfwWindowShouldClose(window))
 	{
+
+		double currentFrame = glfwGetTime();
+		deltaTime = float(currentFrame - lastFrame);
+
 		processInput(window);
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -120,21 +132,26 @@ int main()
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 proj = glm::mat4(1.0f);
 
-		view = glm::translate(view, glm::vec3(0.0f, -1.5f, -2.0f));
-		view = glm::rotate(view, glm::radians(50.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		proj = glm::perspective(glm::radians(45.0f), ((float)width / height), 0.1f, 100.0f);
+		float time = glfwGetTime();
+		model = glm::rotate(model, time * 0.7f, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, time * 1.1f, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, time * 0.4f, glm::vec3(0.0f, 0.0f, 1.0f));
 
+		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		proj = glm::perspective(glm::radians(45.0f), ((float)width / height), 0.1f, 100.0f);
 		shader.use();
 		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
 
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
 		// check and call events and swap the buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+
+		lastFrame = currentFrame;
 	}
 
 	glDeleteVertexArrays(1, &VAO);
@@ -154,6 +171,16 @@ void processInput(GLFWwindow* window)
 	{
 		glfwSetWindowShouldClose(window, true);
 	}
+
+	const float speed = 2.5f * deltaTime;
+	if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		cameraPos += speed * cameraFront;
+	if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		cameraPos -= speed * cameraFront;
+	if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * speed;
+	if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * speed;
 }
 
 void framebuffer_size_callback(GLFWwindow*, int width, int height)
