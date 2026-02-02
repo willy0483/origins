@@ -10,15 +10,10 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/noise.hpp>
 
-#include "shader.h"
+#include "camera.h"
 
 const unsigned int width = 800;
 const unsigned int height = 600;
-
-// camera
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 // timing
 float deltaTime = 0.0f;
@@ -56,7 +51,8 @@ int main()
 	// create shaders
 	Shader shader = Shader("src/Shaders/default.vert", "src/Shaders/default.frag");
 
-	// camera - Walk around : https://learnopengl.com/Getting-started/Camera
+	// camera - Look around : https://learnopengl.com/Getting-started/Camera
+
 
 	float vertices[] = {
 		-0.5f, -0.5f, 0.5f, // 0: Bottom front left
@@ -110,6 +106,9 @@ int main()
 	// unbind
 	glBindVertexArray(0);
 
+	// Camera
+	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
+
 	glEnable(GL_DEPTH_TEST);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -128,21 +127,11 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glm::mat4 model = glm::mat4(1.0f);
-		glm::mat4 view = glm::mat4(1.0f);
-		glm::mat4 proj = glm::mat4(1.0f);
+		camera.Inputs(window, deltaTime);
+		camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
-		float time = glfwGetTime();
-		model = glm::rotate(model, time * 0.7f, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, time * 1.1f, glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, time * 0.4f, glm::vec3(0.0f, 0.0f, 1.0f));
-
-		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-		proj = glm::perspective(glm::radians(45.0f), ((float)width / height), 0.1f, 100.0f);
 		shader.use();
-		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
+		camera.Matrix(shader, "camMatrix");
 
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
@@ -172,16 +161,6 @@ void processInput(GLFWwindow* window)
 	{
 		glfwSetWindowShouldClose(window, true);
 	}
-
-	const float speed = 2.5f * deltaTime;
-	if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		cameraPos += speed * cameraFront;
-	if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		cameraPos -= speed * cameraFront;
-	if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * speed;
-	if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * speed;
 }
 
 void framebuffer_size_callback(GLFWwindow*, int width, int height)

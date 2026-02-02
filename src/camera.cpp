@@ -1,18 +1,43 @@
 #include "camera.h"
 
 Camera::Camera(int newWidth, int newHeight, glm::vec3 newPosition)
-	: width(newWidth)
+	: position(newPosition)
+	, width(newWidth)
 	, height(newHeight)
-	, position(newPosition)
 {}
 
-void Camera::Matrix(float fovdeg, float nearPlane, float farPlane, Shader& shader, const char* uniform)
+void Camera::updateMatrix(float FOVdeg, float nearPlane, float farPlane)
 {
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 projection = glm::mat4(1.0f);
 
 	view = glm::lookAt(position, position + orientation, up);
-	projection = glm::perspective(glm::radians(fovdeg), (float)width / height, nearPlane, farPlane);
+	projection = glm::perspective(glm::radians(FOVdeg), (float)width / height, nearPlane, farPlane);
 
-	glUniformMatrix4fv(glGetUniformLocation(shader.ID, uniform), 1, GL_FALSE, glm::value_ptr(projection * view));
+	camMatrix = projection * view;
+}
+
+void Camera::Matrix(Shader& shader, const char* uniform)
+{
+	glUniformMatrix4fv(glGetUniformLocation(shader.ID, uniform), 1, GL_FALSE, glm::value_ptr(camMatrix));
+}
+
+void Camera::Inputs(GLFWwindow* window, float deltaTime)
+{
+	if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		position += speed * deltaTime * orientation;
+	}
+	if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		position += speed * deltaTime * -glm::normalize(glm::cross(orientation, up));
+	}
+	if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		position += speed * deltaTime * -orientation;
+	}
+	if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		position += speed * deltaTime * glm::normalize(glm::cross(orientation, up));
+	}
 }
