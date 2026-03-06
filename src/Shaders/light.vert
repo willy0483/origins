@@ -10,3 +10,4 @@ void main()
 {
     gl_Position = cameraMatrix * model * vec4(aPos, 1.0f);
 }
+

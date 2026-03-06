@@ -11,18 +11,17 @@
 #include <glm/gtc/noise.hpp>
 
 #include "shader.h"
+#include "Camera/camera.h"
 
 const unsigned int width = 800;
 const unsigned int height = 600;
 
-// camera
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
+// camera
+Camera camera(width, height, glm::vec3(0.0f, 0.0f, 3.0f));
 
 void processInput(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow*, int width, int height);
@@ -53,10 +52,8 @@ int main()
 		return -1;
 	}
 
-	// create shaders
-	Shader shader = Shader("src/Shaders/default.vert", "src/Shaders/default.frag");
-
-	// camera - Walk around : https://learnopengl.com/Getting-started/Camera
+	Shader defaultShader = Shader("src/Shaders/default.vert", "src/Shaders/default.frag");
+	Shader lightShader = Shader("src/Shaders/light.vert", "src/Shaders/light.frag");
 
 	float vertices[] = {
 		-0.5f, -0.5f, 0.5f, // 0: Bottom front left
@@ -88,12 +85,10 @@ int main()
 	unsigned int VBO;
 	unsigned int EBO;
 
-	// generate
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
 
-	// bind - data
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -102,12 +97,30 @@ int main()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	// attributes
-	// positions
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	// unbind
+	glBindVertexArray(0);
+
+	unsigned int lightVAO;
+	unsigned int lightVBO;
+	unsigned int lightEBO;
+
+	glGenVertexArrays(1, &lightVAO);
+	glGenBuffers(1, &lightVBO);
+	glGenBuffers(1, &lightEBO);
+
+	glBindVertexArray(lightVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
 	glBindVertexArray(0);
 
 	glEnable(GL_DEPTH_TEST);
@@ -128,23 +141,30 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		camera.Input(window, deltaTime);
+		camera.UpdateMatrix(45.0f, 0.1f, 100.0f);
+
 		glm::mat4 model = glm::mat4(1.0f);
-		glm::mat4 view = glm::mat4(1.0f);
-		glm::mat4 proj = glm::mat4(1.0f);
 
 		float time = glfwGetTime();
 		model = glm::rotate(model, time * 0.7f, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, time * 1.1f, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, time * 0.4f, glm::vec3(0.0f, 0.0f, 1.0f));
 
-		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-		proj = glm::perspective(glm::radians(45.0f), ((float)width / height), 0.1f, 100.0f);
-		shader.use();
-		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
+		defaultShader.use();
+		camera.Matrix(defaultShader, "cameraMatrix");
+		glUniformMatrix4fv(glGetUniformLocation(defaultShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
 		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
+
+		lightShader.use();
+		glm::mat4 lightModel = glm::mat4(1.0f);
+		lightModel = glm::translate(lightModel, glm::vec3(2.0f, 2.0f, 0.0f));
+		camera.Matrix(lightShader, "cameraMatrix");
+		glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
+
+		glBindVertexArray(lightVAO);
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
 		// check and call events and swap the buffers
@@ -158,8 +178,12 @@ int main()
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
 
-	// delete shaders
-	shader.deleteProgram();
+	glDeleteVertexArrays(1, &lightVAO);
+	glDeleteBuffers(1, &lightVBO);
+	glDeleteBuffers(1, &lightEBO);
+
+	defaultShader.deleteProgram();
+	lightShader.deleteProgram();
 
 	// clearing all previously allocated GLFW resources
 	glfwTerminate();
@@ -168,20 +192,10 @@ int main()
 
 void processInput(GLFWwindow* window)
 {
-	if(glfwGetKey(window, GLFW_KEY_ESCAPE))
+	if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, true);
 	}
-
-	const float speed = 2.5f * deltaTime;
-	if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		cameraPos += speed * cameraFront;
-	if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		cameraPos -= speed * cameraFront;
-	if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * speed;
-	if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * speed;
 }
 
 void framebuffer_size_callback(GLFWwindow*, int width, int height)
