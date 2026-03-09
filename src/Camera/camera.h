@@ -35,6 +35,8 @@ public:
 	void Matrix(Shader& shader, const char* uniform);
 
 	void Input(GLFWwindow* window, float deltaTime);
+
+	glm::vec3 GetPosition() const;
 };
 
 #endif

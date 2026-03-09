@@ -87,3 +87,8 @@ void Camera::Input(GLFWwindow* window, float deltaTime)
 	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	front = glm::normalize(front);
 }
+
+glm::vec3 Camera::GetPosition() const
+{
+	return position;
+}
