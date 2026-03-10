@@ -1,8 +1,8 @@
 #include "Game/game.h"
 
-int main()
+int main(void)
 {
-	Game game;
+	origins::Game game;
 	game.Run();
 
 	return 0;
