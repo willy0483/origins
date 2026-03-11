@@ -2,20 +2,30 @@
 
 using namespace origins;
 
-float vertices[] = {
-	0.5f,  0.5f,  1.0f, 0.0f, 0.0f, // top right
-	0.5f,  -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
-	-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom left
-	-0.5f, 0.5f,  0.0f, 0.0f, 0.0f, // top left
+std::vector<Vertex> vertices = {
+	{ { 0.5f, 0.5f, 1.0f }, { 1.0f, 0.0f, 0.0f } }, // top right
+	{ { 0.5f, -0.5f, 0.0f }, { 0.0f, 1.0f, 0.0f } }, // bottom right
+	{ { -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f, 1.0f } }, // bottom left
+	{ { -0.5f, 0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f } }, // top left
 };
-unsigned int indices[] = {
+
+std::vector<unsigned int> indices = {
 	0, 1, 3, // first Triangle
-	1, 2, 3 // second Triangle
+	1, 2, 3, // second Triangle
 };
 
 Game::Game()
 	: window(nullptr)
+	, shaderCube(nullptr)
+	, mesh(nullptr)
 {}
+
+Game::~Game()
+{
+	delete mesh;
+	delete shaderCube;
+	glfwTerminate();
+}
 
 int Game::Init()
 {
@@ -55,27 +65,8 @@ void Game::Run()
 		return;
 	}
 
-	shaderCube = std::make_unique<Shader>("src/Shaders/default.vert", "src/Shaders/default.frag");
-
-	glGenVertexArrays(1, &cube.VAO);
-	glGenBuffers(1, &cube.VBO);
-	glGenBuffers(1, &cube.EBO);
-
-	glBindVertexArray(cube.VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, cube.VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube.EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	glBindVertexArray(0);
+	shaderCube = new Shader("src/Shaders/default.vert", "src/Shaders/default.frag");
+	mesh = new Mesh(vertices, indices);
 
 	time.lastTime = glfwGetTime();
 
@@ -98,12 +89,6 @@ void Game::Run()
 
 		time.lastTime = time.nowTime;
 	}
-
-	glDeleteVertexArrays(1, &cube.VAO);
-	glDeleteBuffers(1, &cube.VBO);
-	glDeleteBuffers(1, &cube.EBO);
-
-	glfwTerminate();
 }
 
 void Game::Update()
@@ -116,8 +101,7 @@ void Game::Render()
 
 	shaderCube->use();
 
-	glBindVertexArray(cube.VAO);
-	glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
+	mesh->Draw(*shaderCube);
 }
 
 namespace origins

@@ -2,7 +2,6 @@
 #define GAME_H
 
 #include <iostream>
-#include <memory>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -15,26 +14,24 @@
 
 #include "../shader.h"
 #include "../time.h"
-#include "../mesh.h"
 
+#include "../Mesh/mesh.h"
 #include "../Config/config.h"
 
 namespace origins
 {
-
 	class Game
 	{
 	private:
 		GLFWwindow* window;
 		Time time;
 
-		std::unique_ptr<Shader> shaderCube;
-
-		Mesh cube;
+		Shader* shaderCube;
+		Mesh* mesh;
 
 	public:
 		Game();
-		~Game() = default;
+		~Game();
 
 		int Init();
 		void Run();
