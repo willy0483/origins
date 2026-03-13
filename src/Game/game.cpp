@@ -22,8 +22,9 @@ Game::Game()
 
 Game::~Game()
 {
-	delete mesh;
-	delete shaderCube;
+	mesh.reset();
+	resources.textures.clear();
+	shaderCube.reset();
 	glfwTerminate();
 }
 
@@ -65,16 +66,17 @@ void Game::Run()
 		return;
 	}
 
-	shaderCube = new Shader("src/Shaders/default.vert", "src/Shaders/default.frag");
+	shaderCube = std::make_unique<Shader>("src/Shaders/default.vert", "src/Shaders/default.frag");
 
-	std::shared_ptr<Texture> wall = std::make_shared<Texture>(config::assets::wall.c_str());
-	std::shared_ptr<Texture> face = std::make_shared<Texture>(config::assets::face.c_str());
-	wall->LoadTexture(*shaderCube, "texture0", 0);
-	face->LoadTexture(*shaderCube, "texture1", 1);
+	resources.textures.emplace("wall", std::make_shared<Texture>(config::assets::wall.c_str()));
+	resources.textures.emplace("face", std::make_shared<Texture>(config::assets::face.c_str()));
 
-	mesh = new Mesh(vertices, indices);
-	mesh->textures.push_back(wall);
-	mesh->textures.push_back(face);
+	resources.textures["wall"]->LoadTexture(*shaderCube, "texture0", 0);
+	resources.textures["face"]->LoadTexture(*shaderCube, "texture1", 1);
+
+	mesh = std::make_unique<Mesh>(vertices, indices);
+	mesh->textures.push_back(resources.textures["wall"]);
+	mesh->textures.push_back(resources.textures["face"]);
 
 	time.lastTime = glfwGetTime();
 

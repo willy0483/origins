@@ -16,6 +16,8 @@
 #include "../time.h"
 
 #include "../Mesh/mesh.h"
+#include "../Resources/resources.h"
+
 #include "../Config/config.h"
 
 namespace origins
@@ -26,8 +28,10 @@ namespace origins
 		GLFWwindow* window;
 		Time time;
 
-		Shader* shaderCube;
-		Mesh* mesh;
+		std::unique_ptr<Shader> shaderCube;
+		std::unique_ptr<Mesh> mesh;
+
+		Resources resources;
 
 	public:
 		Game();
