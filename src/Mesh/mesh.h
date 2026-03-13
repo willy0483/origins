@@ -5,13 +5,15 @@
 #include <glm/glm.hpp>
 
 #include <vector>
+#include <memory>
 
-#include "../shader.h"
+#include "../Texture/texture.h"
 
 struct Vertex
 {
-	glm::vec3 position;
+	glm::vec2 position;
 	glm::vec3 color;
+	glm::vec2 texCoords;
 };
 
 class Mesh
@@ -26,6 +28,7 @@ private:
 public:
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
+	std::vector<std::shared_ptr<Texture>> textures;
 
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
 	~Mesh();

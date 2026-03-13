@@ -8,6 +8,13 @@ namespace config
 	extern const unsigned int width;
 	extern const unsigned int height;
 	extern const std::string title;
+
+	namespace assets
+	{
+		extern const std::string wall;
+		extern const std::string face;
+	} // namespace assets
+
 } // namespace config
 
 #endif

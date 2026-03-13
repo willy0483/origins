@@ -3,10 +3,10 @@
 using namespace origins;
 
 std::vector<Vertex> vertices = {
-	{ { 0.5f, 0.5f, 1.0f }, { 1.0f, 0.0f, 0.0f } }, // top right
-	{ { 0.5f, -0.5f, 0.0f }, { 0.0f, 1.0f, 0.0f } }, // bottom right
-	{ { -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f, 1.0f } }, // bottom left
-	{ { -0.5f, 0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f } }, // top left
+	{ { 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 1.0f } }, // top right
+	{ { 0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f } }, // bottom right
+	{ { -0.5f, -0.5f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } }, // bottom left
+	{ { -0.5f, 0.5f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f } }, // top left
 };
 
 std::vector<unsigned int> indices = {
@@ -66,7 +66,15 @@ void Game::Run()
 	}
 
 	shaderCube = new Shader("src/Shaders/default.vert", "src/Shaders/default.frag");
+
+	std::shared_ptr<Texture> wall = std::make_shared<Texture>(config::assets::wall.c_str());
+	std::shared_ptr<Texture> face = std::make_shared<Texture>(config::assets::face.c_str());
+	wall->LoadTexture(*shaderCube, "texture0", 0);
+	face->LoadTexture(*shaderCube, "texture1", 1);
+
 	mesh = new Mesh(vertices, indices);
+	mesh->textures.push_back(wall);
+	mesh->textures.push_back(face);
 
 	time.lastTime = glfwGetTime();
 

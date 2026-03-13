@@ -8,6 +8,7 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     src/Game/game.cpp
     src/Mesh/mesh.cpp
+    src/Texture/texture.cpp
     src/Config/config.cpp
     src/stb_image.cpp
 )
