@@ -3,10 +3,10 @@
 using namespace origins;
 
 std::vector<Vertex> vertices = {
-	{ { 0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 1.0f } }, // top right
-	{ { 0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f } }, // bottom right
-	{ { -0.5f, -0.5f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } }, // bottom left
-	{ { -0.5f, 0.5f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f } }, // top left
+	{ { 100.0f, 100.0f }, { 1.0f, 0.0f, 0.0f }, { 1.0f, 1.0f } },
+	{ { 100.0f, -100.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f } },
+	{ { -100.0f, -100.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
+	{ { -100.0f, 100.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f } },
 };
 
 std::vector<unsigned int> indices = {
@@ -16,6 +16,7 @@ std::vector<unsigned int> indices = {
 
 Game::Game()
 	: window(nullptr)
+	, camera(config::width, config::height, glm::vec3(0.0f, 0.0f, 0.0f))
 	, shaderCube(nullptr)
 	, mesh(nullptr)
 {}
@@ -54,6 +55,8 @@ int Game::Init()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
+
+	glEnable(GL_DEPTH_TEST);
 
 	return 0;
 }
@@ -102,14 +105,20 @@ void Game::Run()
 }
 
 void Game::Update()
-{}
+{
+	camera.Input(window, time.deltaTime);
+	camera.UpdateMatrix(0.0f, 1.0f);
+}
 
 void Game::Render()
 {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	shaderCube->use();
+	camera.Matrix(*shaderCube, "cameraMatrix");
+
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(400.0f, 300.0f, 0.0f));
+	glUniformMatrix4fv(glGetUniformLocation(shaderCube->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
 	mesh->Draw(*shaderCube);
 }

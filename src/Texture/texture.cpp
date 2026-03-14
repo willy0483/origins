@@ -21,8 +21,7 @@ void Texture::LoadTexture(Shader& shader, const string& uniform, int index)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	stbi_set_flip_vertically_on_load(true);
-
+	//stbi_set_flip_vertically_on_load(true);
 	unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
 	if(data)
 	{
@@ -47,6 +46,8 @@ void Texture::LoadTexture(Shader& shader, const string& uniform, int index)
 	{
 		std::cout << "Failed to load texture" << std::endl;
 	}
+
+	stbi_image_free(data);
 
 	shader.use();
 	glUniform1i(glGetUniformLocation(shader.ID, uniform.c_str()), index);

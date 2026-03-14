@@ -14,6 +14,7 @@
 
 #include "../shader.h"
 #include "../time.h"
+#include "../Camera/camera.h"
 
 #include "../Mesh/mesh.h"
 #include "../Resources/resources.h"
@@ -27,6 +28,7 @@ namespace origins
 	private:
 		GLFWwindow* window;
 		Time time;
+		Camera camera;
 
 		std::unique_ptr<Shader> shaderCube;
 		std::unique_ptr<Mesh> mesh;
