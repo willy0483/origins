@@ -24,18 +24,18 @@ void Camera::Input(GLFWwindow* window, float deltaTime)
 {
 	if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		position.y -= speed * deltaTime;
+		position.y += speed * deltaTime;
 	}
 	if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
-		position.y += speed * deltaTime;
+		position.y -= speed * deltaTime;
 	}
 	if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		position.x -= speed * deltaTime;
+		position.x += speed * deltaTime;
 	}
 	if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
-		position.x += speed * deltaTime;
+		position.x -= speed * deltaTime;
 	}
 }

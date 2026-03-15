@@ -17,6 +17,7 @@
 #include "../Camera/camera.h"
 
 #include "../Mesh/mesh.h"
+#include "../Sprite/sprite.h"
 #include "../Resources/resources.h"
 
 #include "../Config/config.h"
@@ -29,6 +30,8 @@ namespace origins
 		GLFWwindow* window;
 		Time time;
 		Camera camera;
+
+		Sprite sprite;
 
 		std::unique_ptr<Shader> shaderCube;
 		std::unique_ptr<Mesh> mesh;

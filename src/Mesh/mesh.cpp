@@ -45,11 +45,6 @@ void Mesh::SetupMesh()
 void Mesh::Draw(Shader& shader)
 {
 	shader.use();
-	for(int i = 0; i < (int)textures.size(); i++)
-	{
-		textures[i]->Bind(i);
-	}
-
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
