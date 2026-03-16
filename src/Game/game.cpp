@@ -89,15 +89,15 @@ void Game::Run()
 
 	sprites.push_back(sprite);
 
-	time.lastTime = glfwGetTime();
+	lastTime = glfwGetTime();
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	// main loop
 	while(!glfwWindowShouldClose(window))
 	{
-		time.nowTime = glfwGetTime();
-		time.deltaTime = time.nowTime - time.lastTime;
+		nowTime = glfwGetTime();
+		deltaTime = nowTime - lastTime;
 
 		processInput(window);
 
@@ -108,13 +108,13 @@ void Game::Run()
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-		time.lastTime = time.nowTime;
+		lastTime = nowTime;
 	}
 }
 
 void Game::Update()
 {
-	camera.Input(window, time.deltaTime);
+	camera.Input(window, deltaTime);
 	camera.UpdateMatrix(0.0f, 1.0f);
 }
 

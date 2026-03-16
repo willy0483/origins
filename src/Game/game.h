@@ -28,8 +28,11 @@ namespace origins
 	{
 	private:
 		GLFWwindow* window;
-		Time time;
 		Camera camera;
+
+		double lastTime = 0.0;
+		double nowTime = 0.0;
+		double deltaTime = 0.0;
 
 		std::vector<Sprite> sprites;
 
