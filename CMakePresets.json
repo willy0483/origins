@@ -4,6 +4,7 @@
     {
       "name": "base",
       "hidden": true,
+      "binaryDir": "${sourceDir}/build/",
       "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
@@ -15,7 +16,6 @@
     {
       "name": "linux",
       "inherits": "base",
-      "binaryDir": "${sourceDir}/build/linux",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -28,7 +28,6 @@
     {
       "name": "windows",
       "inherits": "base",
-      "binaryDir": "${sourceDir}/build/windows",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
