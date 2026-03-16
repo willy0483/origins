@@ -31,7 +31,7 @@ namespace origins
 		Time time;
 		Camera camera;
 
-		Sprite sprite;
+		std::vector<Sprite> sprites;
 
 		std::unique_ptr<Shader> shaderCube;
 		std::unique_ptr<Mesh> mesh;

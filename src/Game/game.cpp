@@ -81,10 +81,13 @@ void Game::Run()
 
 	mesh = std::make_unique<Mesh>(vertices, indices);
 
+	Sprite sprite;
 	sprite.position = glm::vec2(100.0f, 100.0f);
 	sprite.size = glm::vec2(64.0f, 64.0f);
 	sprite.rotation = 0.0f;
 	sprite.texture = resources.textures["face"].get();
+
+	sprites.push_back(sprite);
 
 	time.lastTime = glfwGetTime();
 
@@ -122,17 +125,20 @@ void Game::Render()
 
 	camera.Matrix(*shaderCube, "cameraMatrix");
 
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(sprite.position, 0.0f));
-	model = glm::rotate(model, glm::radians(sprite.rotation), glm::vec3(0, 0, 1));
-	model = glm::scale(model, glm::vec3(sprite.size, 1.0f));
+	for(Sprite& sprite : sprites)
+	{
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(sprite.position, 0.0f));
+		model = glm::rotate(model, glm::radians(sprite.rotation), glm::vec3(0, 0, 1));
+		model = glm::scale(model, glm::vec3(sprite.size, 1.0f));
 
-	shaderCube->use();
-	glUniformMatrix4fv(glGetUniformLocation(shaderCube->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		shaderCube->use();
+		glUniformMatrix4fv(glGetUniformLocation(shaderCube->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
-	sprite.texture->Bind(0);
+		sprite.texture->Bind(0);
 
-	mesh->Draw(*shaderCube);
+		mesh->Draw(*shaderCube);
+	}
 }
 
 namespace origins
