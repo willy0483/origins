@@ -16,8 +16,9 @@
 #include "../time.h"
 #include "../Camera/camera.h"
 
+#include "../Object/object.h"
+
 #include "../Mesh/mesh.h"
-#include "../Sprite/sprite.h"
 #include "../Resources/resources.h"
 
 #include "../Config/config.h"
@@ -34,7 +35,7 @@ namespace origins
 		double nowTime = 0.0;
 		double deltaTime = 0.0;
 
-		std::vector<Sprite> sprites;
+		std::vector<Object> objects;
 
 		std::unique_ptr<Shader> shaderCube;
 		std::unique_ptr<Mesh> mesh;

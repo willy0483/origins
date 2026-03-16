@@ -4,8 +4,6 @@
 #include <glm/glm.hpp>
 #include "../Texture/texture.h"
 
-#include <memory>
-
 struct Sprite
 {
 	glm::vec2 position;

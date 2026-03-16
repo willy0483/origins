@@ -87,7 +87,10 @@ void Game::Run()
 	sprite.rotation = 0.0f;
 	sprite.texture = resources.textures["face"].get();
 
-	sprites.push_back(sprite);
+	Object object;
+	object.sprite = &sprite;
+
+	objects.push_back(object);
 
 	lastTime = glfwGetTime();
 
@@ -125,17 +128,17 @@ void Game::Render()
 
 	camera.Matrix(*shaderCube, "cameraMatrix");
 
-	for(Sprite& sprite : sprites)
+	for(Object& object : objects)
 	{
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(sprite.position, 0.0f));
-		model = glm::rotate(model, glm::radians(sprite.rotation), glm::vec3(0, 0, 1));
-		model = glm::scale(model, glm::vec3(sprite.size, 1.0f));
+		model = glm::translate(model, glm::vec3(object.sprite->position, 0.0f));
+		model = glm::rotate(model, glm::radians(object.sprite->rotation), glm::vec3(0, 0, 1));
+		model = glm::scale(model, glm::vec3(object.sprite->size, 1.0f));
 
 		shaderCube->use();
 		glUniformMatrix4fv(glGetUniformLocation(shaderCube->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
-		sprite.texture->Bind(0);
+		object.sprite->texture->Bind(0);
 
 		mesh->Draw(*shaderCube);
 	}
