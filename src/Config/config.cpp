@@ -8,8 +8,11 @@ namespace config
 
 	namespace assets
 	{
-		const std::string wall = "assets/wall.jpg";
-		const std::string face = "assets/awesomeface.png";
+		namespace path
+		{
+			const std::string wall = "assets/wall.jpg";
+			const std::string face = "assets/awesomeface.png";
+		} // namespace path
 	} // namespace assets
 
 } // namespace config

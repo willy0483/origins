@@ -73,8 +73,8 @@ void Game::Run()
 
 	shaderCube = std::make_unique<Shader>("src/Shaders/default.vert", "src/Shaders/default.frag");
 
-	resources.textures.emplace("wall", std::make_shared<Texture>(config::assets::wall.c_str()));
-	resources.textures.emplace("face", std::make_shared<Texture>(config::assets::face.c_str()));
+	resources.textures.emplace("wall", std::make_shared<Texture>(config::assets::path::wall.c_str()));
+	resources.textures.emplace("face", std::make_shared<Texture>(config::assets::path::face.c_str()));
 
 	resources.textures["wall"]->LoadTexture(*shaderCube, "texture0", 0);
 	resources.textures["face"]->LoadTexture(*shaderCube, "texture1", 1);

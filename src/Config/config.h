@@ -11,8 +11,11 @@ namespace config
 
 	namespace assets
 	{
-		extern const std::string wall;
-		extern const std::string face;
+		namespace path
+		{
+			extern const std::string wall;
+			extern const std::string face;
+		} // namespace path
 	} // namespace assets
 
 } // namespace config
