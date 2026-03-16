@@ -1,6 +1,2 @@
 # Origins
 
-
-## todo
-
-- view / camera

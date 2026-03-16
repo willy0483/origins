@@ -25,7 +25,6 @@ Game::~Game()
 {
 	mesh.reset();
 	shaderCube.reset();
-	resources.textures.clear();
 	glfwTerminate();
 }
 
@@ -73,24 +72,7 @@ void Game::Run()
 
 	shaderCube = std::make_unique<Shader>("src/Shaders/default.vert", "src/Shaders/default.frag");
 
-	resources.textures.emplace("wall", std::make_shared<Texture>(config::assets::path::wall.c_str()));
-	resources.textures.emplace("face", std::make_shared<Texture>(config::assets::path::face.c_str()));
-
-	resources.textures["wall"]->LoadTexture(*shaderCube, "texture0", 0);
-	resources.textures["face"]->LoadTexture(*shaderCube, "texture1", 1);
-
 	mesh = std::make_unique<Mesh>(vertices, indices);
-
-	Sprite sprite;
-	sprite.position = glm::vec2(100.0f, 100.0f);
-	sprite.size = glm::vec2(64.0f, 64.0f);
-	sprite.rotation = 0.0f;
-	sprite.texture = resources.textures["face"].get();
-
-	Object object;
-	object.sprite = &sprite;
-
-	objects.push_back(object);
 
 	lastTime = glfwGetTime();
 
@@ -128,20 +110,15 @@ void Game::Render()
 
 	camera.Matrix(*shaderCube, "cameraMatrix");
 
-	for(Object& object : objects)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(object.sprite->position, 0.0f));
-		model = glm::rotate(model, glm::radians(object.sprite->rotation), glm::vec3(0, 0, 1));
-		model = glm::scale(model, glm::vec3(object.sprite->size, 1.0f));
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(100.0f, 100.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0, 0, 1));
+	model = glm::scale(model, glm::vec3(32.0f, 32.0f, 1.0f));
 
-		shaderCube->use();
-		glUniformMatrix4fv(glGetUniformLocation(shaderCube->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	shaderCube->use();
+	glUniformMatrix4fv(glGetUniformLocation(shaderCube->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
-		object.sprite->texture->Bind(0);
-
-		mesh->Draw(*shaderCube);
-	}
+	mesh->Draw(*shaderCube);
 }
 
 namespace origins

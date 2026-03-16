@@ -16,10 +16,7 @@
 #include "../time.h"
 #include "../Camera/camera.h"
 
-#include "../Object/object.h"
-
 #include "../Mesh/mesh.h"
-#include "../Resources/resources.h"
 
 #include "../Config/config.h"
 
@@ -35,12 +32,8 @@ namespace origins
 		double nowTime = 0.0;
 		double deltaTime = 0.0;
 
-		std::vector<Object> objects;
-
 		std::unique_ptr<Shader> shaderCube;
 		std::unique_ptr<Mesh> mesh;
-
-		Resources resources;
 
 	public:
 		Game();
