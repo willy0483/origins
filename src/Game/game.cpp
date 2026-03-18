@@ -70,8 +70,15 @@ void Game::Run()
 	}
 
 	resource.loadShader("src/Shaders/default.vert", "src/Shaders/default.frag", "test");
+	resource.loadTexture("assets/wall.jpg", "wall");
+	resource.loadTexture("assets/awesomeface.png", "face");
 
 	mesh = std::make_unique<Mesh>(vertices, indices);
+
+	Shader& shader = resource.getShader("test");
+	shader.use();
+	glUniform1i(glGetUniformLocation(shader.ID, "texture0"), 0);
+	glUniform1i(glGetUniformLocation(shader.ID, "texture1"), 1);
 
 	lastTime = glfwGetTime();
 
@@ -107,6 +114,9 @@ void Game::Render()
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	resource.getTexture("wall").bind(0);
+	resource.getTexture("face").bind(1);
+
 	Shader& shader = resource.getShader("test");
 
 	camera.Matrix(resource.getShader("test"), "cameraMatrix");
@@ -116,7 +126,7 @@ void Game::Render()
 	model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0, 0, 1));
 	model = glm::scale(model, glm::vec3(32.0f, 32.0f, 1.0f));
 
-	resource.getShader("test");
+	shader.use();
 	glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
 	mesh->Draw(shader);
@@ -133,6 +143,8 @@ namespace origins
 	}
 
 	void framebuffer_size_callback(GLFWwindow*, int width, int height)
-	{ glViewport(0, 0, width, height); }
+	{
+		glViewport(0, 0, width, height);
+	}
 
 } // namespace origins

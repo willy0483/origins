@@ -18,16 +18,13 @@ private:
 	int height;
 	int nrChannels;
 
-	std::string path;
-
 public:
-	Texture(const std::string& path);
+	Texture();
 	~Texture();
 
-	void LoadTexture(Shader& shader, const std::string& uniform, int index);
-
-	void Bind(unsigned int uni) const;
-	int GetId() const;
+	void load(const char* filePath);
+	void bind(unsigned int uni) const;
+	void deleteTexture();
 };
 
 #endif

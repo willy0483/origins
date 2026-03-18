@@ -2,18 +2,16 @@
 
 using namespace std;
 
-Texture::Texture(const string& path)
-	: path(path)
-{}
-
-Texture::~Texture()
-{
-	glDeleteTextures(1, &id);
-}
-
-void Texture::LoadTexture(Shader& shader, const string& uniform, int index)
+Texture::Texture()
 {
 	glGenTextures(1, &id);
+}
+
+Texture::~Texture()
+{}
+
+void Texture::load(const char* filePath)
+{
 	glBindTexture(GL_TEXTURE_2D, id);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -22,7 +20,7 @@ void Texture::LoadTexture(Shader& shader, const string& uniform, int index)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	//stbi_set_flip_vertically_on_load(true);
-	unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load(filePath, &width, &height, &nrChannels, 0);
 	if(data)
 	{
 		GLenum format = GL_RGB;
@@ -48,18 +46,16 @@ void Texture::LoadTexture(Shader& shader, const string& uniform, int index)
 	}
 
 	stbi_image_free(data);
-
-	shader.use();
-	glUniform1i(glGetUniformLocation(shader.ID, uniform.c_str()), index);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture::Bind(unsigned int uni) const
+void Texture::bind(unsigned int uni) const
 {
 	glActiveTexture(GL_TEXTURE0 + uni);
-	glBindTexture(GL_TEXTURE_2D, GetId());
+	glBindTexture(GL_TEXTURE_2D, id);
 }
 
-int Texture::GetId() const
+void Texture::deleteTexture()
 {
-	return id;
+	glDeleteTextures(1, &id);
 }
