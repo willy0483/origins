@@ -12,9 +12,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "../shader.h"
 #include "../time.h"
 #include "../Camera/camera.h"
+#include "../Resource/resource.h"
 
 #include "../Mesh/mesh.h"
 
@@ -32,7 +32,8 @@ namespace origins
 		double nowTime = 0.0;
 		double deltaTime = 0.0;
 
-		std::unique_ptr<Shader> shaderCube;
+		Resource resource;
+
 		std::unique_ptr<Mesh> mesh;
 
 	public:

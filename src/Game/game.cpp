@@ -17,14 +17,13 @@ std::vector<unsigned int> indices = {
 Game::Game()
 	: window(nullptr)
 	, camera(config::width, config::height, glm::vec3(0.0f, 0.0f, 0.0f))
-	, shaderCube(nullptr)
 	, mesh(nullptr)
 {}
 
 Game::~Game()
 {
 	mesh.reset();
-	shaderCube.reset();
+	resource.clear();
 	glfwTerminate();
 }
 
@@ -70,7 +69,7 @@ void Game::Run()
 		return;
 	}
 
-	shaderCube = std::make_unique<Shader>("src/Shaders/default.vert", "src/Shaders/default.frag");
+	resource.loadShader("src/Shaders/default.vert", "src/Shaders/default.frag", "test");
 
 	mesh = std::make_unique<Mesh>(vertices, indices);
 
@@ -108,17 +107,19 @@ void Game::Render()
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	camera.Matrix(*shaderCube, "cameraMatrix");
+	Shader& shader = resource.getShader("test");
+
+	camera.Matrix(resource.getShader("test"), "cameraMatrix");
 
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(100.0f, 100.0f, 0.0f));
 	model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0, 0, 1));
 	model = glm::scale(model, glm::vec3(32.0f, 32.0f, 1.0f));
 
-	shaderCube->use();
-	glUniformMatrix4fv(glGetUniformLocation(shaderCube->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	resource.getShader("test");
+	glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
-	mesh->Draw(*shaderCube);
+	mesh->Draw(shader);
 }
 
 namespace origins
@@ -132,8 +133,6 @@ namespace origins
 	}
 
 	void framebuffer_size_callback(GLFWwindow*, int width, int height)
-	{
-		glViewport(0, 0, width, height);
-	}
+	{ glViewport(0, 0, width, height); }
 
 } // namespace origins
