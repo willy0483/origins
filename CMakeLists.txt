@@ -10,6 +10,7 @@ add_executable(${PROJECT_NAME}
     src/Mesh/mesh.cpp
     src/Camera/camera.cpp
     src/Texture/texture.cpp
+    src/Resource/resource.cpp
     src/Config/config.cpp
     src/stb_image.cpp
 )
