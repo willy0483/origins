@@ -3,3 +3,5 @@
 
 -- ECS
 https://chatgpt.com/c/69bd0d43-be04-8331-821e-2ca3d6388fb2
+
+https://docs.vulkan.org/tutorial/latest/Building_a_Simple_Engine/Engine_Architecture/02_architectural_patterns.html#_component_based_architecture
