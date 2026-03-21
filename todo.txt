@@ -1,11 +1,13 @@
 
 
--- Shaders
-world - shader
-sprite - shader
+
+-- Entity
+https://www.youtube.com/watch?v=j8v9O3aFk04 -- !
 
 
 -- Sprites
+https://www.youtube.com/watch?v=BJq-SqMd9FM -- !
+
 https://learnopengl.com/In-Practice/2D-Game/Rendering-Sprites
 
 
