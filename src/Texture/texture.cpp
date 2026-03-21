@@ -3,9 +3,7 @@
 using namespace std;
 
 Texture::Texture()
-{
-	glGenTextures(1, &id);
-}
+{ glGenTextures(1, &id); }
 
 Texture::~Texture()
 {}
@@ -56,6 +54,4 @@ void Texture::bind(unsigned int uni) const
 }
 
 void Texture::deleteTexture()
-{
-	glDeleteTextures(1, &id);
-}
+{ glDeleteTextures(1, &id); }

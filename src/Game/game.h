@@ -15,6 +15,7 @@
 #include "../time.h"
 #include "../Camera/camera.h"
 #include "../Resource/resource.h"
+#include "../sprite.h"
 
 #include "../Mesh/mesh.h"
 
@@ -35,6 +36,8 @@ namespace origins
 		Resource resource;
 
 		std::unique_ptr<Mesh> mesh;
+
+		Sprite sprite;
 
 	public:
 		Game();

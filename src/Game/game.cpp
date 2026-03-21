@@ -73,6 +73,11 @@ void Game::Run()
 	resource.loadTexture("assets/wall.jpg", "wall");
 	resource.loadTexture("assets/awesomeface.png", "face");
 
+	sprite.texture = &resource.getTexture("wall");
+	sprite.position = glm::vec2{ 100.0f, 100.0f };
+	sprite.rotation = 0;
+	sprite.size = glm::vec2{ 32.0f, 32.0f };
+
 	mesh = std::make_unique<Mesh>(vertices, indices);
 
 	Shader& shader = resource.getShader("test");
@@ -122,9 +127,9 @@ void Game::Render()
 	camera.Matrix(resource.getShader("test"), "cameraMatrix");
 
 	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(100.0f, 100.0f, 0.0f));
-	model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0, 0, 1));
-	model = glm::scale(model, glm::vec3(32.0f, 32.0f, 1.0f));
+	model = glm::translate(model, glm::vec3(sprite.position, 0.0f));
+	model = glm::rotate(model, glm::radians(sprite.rotation), glm::vec3(0, 0, 1));
+	model = glm::scale(model, glm::vec3(sprite.size, 1.0f));
 
 	shader.use();
 	glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
