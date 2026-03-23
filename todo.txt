@@ -1,15 +1,6 @@
 
-
-
--- Entity
-https://www.youtube.com/watch?v=j8v9O3aFk04 -- !
-
-
--- Sprites
-https://www.youtube.com/watch?v=BJq-SqMd9FM -- !
-
-https://learnopengl.com/In-Practice/2D-Game/Rendering-Sprites
-
+-- start over
+https://www.youtube.com/watch?v=WficzyoTSsg&list=PLYokS5qr7lSsvgemrTwMSrQsdk4BRqJU6&index=1
 
 -- ECS
 https://chatgpt.com/c/69bd0d43-be04-8331-821e-2ca3d6388fb2
